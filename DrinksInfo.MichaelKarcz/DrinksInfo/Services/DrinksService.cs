@@ -2,63 +2,61 @@
 using Newtonsoft.Json;
 using DrinksInfo.Models;
 
-namespace DrinksInfo.Services
+namespace DrinksInfo.Services;
+internal static class DrinksService
 {
-    internal static class DrinksService
+    internal static List<Category> GetCategories()
     {
-        internal static List<Category> GetCategories()
+        RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
+        RestRequest request = new RestRequest("list.php?c=list");
+        var response = Client.ExecuteAsync(request);
+
+        if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
         {
-            RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
-            RestRequest request = new RestRequest("list.php?c=list");
-            var response = Client.ExecuteAsync(request);
+            string rawResponse = response.Result.Content;
+            var serialize = JsonConvert.DeserializeObject<Categories>(rawResponse);
 
-            if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                string rawResponse = response.Result.Content;
-                var serialize = JsonConvert.DeserializeObject<Categories>(rawResponse);
+            List<Category> categories = serialize.CategoriesList;
 
-                List<Category> categories = serialize.CategoriesList;
-
-                return categories;
-            }
-            else return new List<Category>();
+            return categories;
         }
+        else return new List<Category>();
+    }
 
-        internal static List<Drink> GetDrinksByCategory(Category category)
+    internal static List<Drink> GetDrinksByCategory(Category category)
+    {
+        string categoryName = category.ToString().Replace(" ", "_");
+        RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
+        RestRequest request = new RestRequest("filter.php?c=" + categoryName);
+        var response = Client.ExecuteAsync(request);
+        
+        if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
         {
-            string categoryName = category.ToString().Replace(" ", "_");
-            RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
-            RestRequest request = new RestRequest("filter.php?c=" + categoryName);
-            var response = Client.ExecuteAsync(request);
-            
-            if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                string rawResponse = response.Result.Content;
-                var serialize = JsonConvert.DeserializeObject<Drinks>(rawResponse);
+            string rawResponse = response.Result.Content;
+            var serialize = JsonConvert.DeserializeObject<Drinks>(rawResponse);
 
-                List<Drink> categories = serialize.DrinksList;
+            List<Drink> drinks = serialize.DrinksList;
 
-                return categories;
-            }
-            else return new List<Drink>();
+            return drinks;
         }
+        else return new List<Drink>();
+    }
 
-        internal static DrinkInfo GetDrinkInfo(Drink drink)
+    internal static DrinkInfo GetDrinkInfo(Drink drink)
+    {
+        RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
+        RestRequest request = new RestRequest("lookup.php?i=" + drink.Id.ToString());
+        var response = Client.ExecuteAsync(request);
+
+        if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
         {
-            RestClient Client = new RestClient("http://www.thecocktaildb.com/api/json/v1/1/");
-            RestRequest request = new RestRequest("lookup.php?i=" + drink.GetId().ToString());
-            var response = Client.ExecuteAsync(request);
+            string rawResponse = response.Result.Content;
+            var serialize = JsonConvert.DeserializeObject<DrinkInfos>(rawResponse);
 
-            if (response.Result.StatusCode == System.Net.HttpStatusCode.OK)
-            {
-                string rawResponse = response.Result.Content;
-                var serialize = JsonConvert.DeserializeObject<DrinkInfos>(rawResponse);
+            List<DrinkInfo> drinkInfoList = serialize.DrinkInfoList;
 
-                List<DrinkInfo> drinkInfoList = serialize.DrinkInfoList;
-
-                return drinkInfoList[0];
-            }
-            else return new DrinkInfo();
+            return drinkInfoList[0];
         }
+        else return new DrinkInfo();
     }
 }

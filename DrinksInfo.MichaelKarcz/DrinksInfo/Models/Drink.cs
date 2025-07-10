@@ -1,25 +1,13 @@
 ﻿using Newtonsoft.Json;
 
-namespace DrinksInfo.Models
+namespace DrinksInfo.Models;
+public record class Drink
 {
-    public class Drink
-    {
-        public int idDrink { get; set; }
-        public string strDrink { get; set; } = string.Empty;
+    [JsonProperty("idDrink")] public int Id { get; set; }
+    [JsonProperty("strDrink")] public string DrinkName { get; set; }
 
-        public int GetId()
-        {
-            return idDrink;
-        }
-        public override string ToString()
-        {
-            return strDrink;
-        }
-    }
-
-    public class Drinks
+    public override string ToString()
     {
-        [JsonProperty("drinks")]
-        public List<Drink> DrinksList;
+        return DrinkName;
     }
 }
